@@ -518,6 +518,96 @@
     margin-bottom: 0;
   }
 
+  /* Discount bar */
+  .discount-bar-wrap {
+    margin: 0 auto 48px;
+    max-width: 860px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    animation: fadeUp 0.6s 0.15s ease both;
+  }
+
+  .discount-bar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .discount-label {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .discount-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 100px;
+    background: rgba(0,212,255,0.1);
+    color: var(--accent3);
+    border: 1px solid rgba(0,212,255,0.3);
+    transition: all 0.3s;
+  }
+
+  .discount-badge.active {
+    background: rgba(0,212,255,0.2);
+    color: #00ffcc;
+    border-color: #00ffcc;
+  }
+
+  .progress-track {
+    background: var(--border);
+    border-radius: 100px;
+    height: 6px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: var(--grad);
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .discount-tiers {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+
+  .tier-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .tier-label.reached {
+    color: var(--accent3);
+    font-weight: 600;
+  }
+
+  .saving-msg {
+    text-align: center;
+    font-size: 13px;
+    color: #00ffcc;
+    font-weight: 500;
+    margin-top: 8px;
+    min-height: 20px;
+    transition: opacity 0.3s;
+  }
+
+  .total-original {
+    font-size: 14px;
+    color: var(--muted);
+    text-decoration: line-through;
+    margin-right: 8px;
+  }
+
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
@@ -561,6 +651,23 @@
     <span class="included-tag">Google Business Profile</span>
     <span class="included-tag">Live in 7 Days</span>
     <span class="included-tag" style="border-color:rgba(255,59,255,0.4);color:#FF3BFF;background:rgba(255,59,255,0.08)">£39/mo Maintenance Included</span>
+  </div>
+
+  <!-- Discount Bar -->
+  <div class="discount-bar-wrap">
+    <div class="discount-bar-top">
+      <span class="discount-label" id="discountLabel">Add more to unlock a discount</span>
+      <span class="discount-badge" id="discountBadge">No discount yet</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="discount-tiers">
+      <span class="tier-label" id="tier1">£300 = 5% off</span>
+      <span class="tier-label" id="tier2">£400 = 10% off</span>
+      <span class="tier-label" id="tier3">£500 = 15% off</span>
+    </div>
+    <div class="saving-msg" id="savingMsg"></div>
   </div>
 
   <!-- Features -->
@@ -616,8 +723,11 @@
   <div class="sticky-inner">
     <div class="total-left">
       <h3>Your Total</h3>
-      <div class="total-amount" id="totalAmount">£199</div>
-      <div class="total-count" id="totalCount">Base package only</div>
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <span class="total-original" id="totalOriginal" style="display:none"></span>
+        <div class="total-amount" id="totalAmount">£199 + £39/mo</div>
+      </div>
+      <div class="total-count" id="totalCount">Base package + monthly maintenance included</div>
     </div>
     <button class="get-started-btn" onclick="openModal()">Get in Touch →</button>
   </div>
@@ -749,17 +859,65 @@
   }
 
   function updateTotal() {
-    let total = BASE_PRICE + MANDATORY_MONTHLY;
+    let addonsTotal = 0;
     let count = 0;
     selected.forEach(key => {
       const el = document.querySelector(`[data-key="${key}"]`);
-      total += parseInt(el.dataset.price);
+      addonsTotal += parseInt(el.dataset.price);
       count++;
     });
-    document.getElementById('totalAmount').textContent = `£${BASE_PRICE} + £${MANDATORY_MONTHLY}/mo`;
+
+    const subtotal = BASE_PRICE + addonsTotal;
+
+    // Discount logic
+    let discountPct = 0;
+    if (subtotal >= 500) discountPct = 15;
+    else if (subtotal >= 400) discountPct = 10;
+    else if (subtotal >= 300) discountPct = 5;
+
+    const saving = Math.round(subtotal * discountPct / 100);
+    const discounted = subtotal - saving;
+
+    // Update progress bar (cap at 500)
+    const progress = Math.min((subtotal / 500) * 100, 100);
+    document.getElementById('progressFill').style.width = progress + '%';
+
+    // Update tier labels
+    document.getElementById('tier1').className = 'tier-label' + (subtotal >= 300 ? ' reached' : '');
+    document.getElementById('tier2').className = 'tier-label' + (subtotal >= 400 ? ' reached' : '');
+    document.getElementById('tier3').className = 'tier-label' + (subtotal >= 500 ? ' reached' : '');
+
+    // Update badge and label
+    const badge = document.getElementById('discountBadge');
+    const label = document.getElementById('discountLabel');
+    const savingMsg = document.getElementById('savingMsg');
+    const originalEl = document.getElementById('totalOriginal');
+
+    if (discountPct > 0) {
+      badge.textContent = discountPct + '% discount applied!';
+      badge.classList.add('active');
+      label.textContent = 'Nice! You have unlocked a discount';
+      savingMsg.textContent = 'You are saving £' + saving + ' on your package';
+      originalEl.style.display = 'inline';
+      originalEl.textContent = '£' + subtotal;
+    } else {
+      const nextTier = subtotal < 300 ? 300 : subtotal < 400 ? 400 : 500;
+      const needed = nextTier - subtotal;
+      badge.textContent = 'No discount yet';
+      badge.classList.remove('active');
+      label.textContent = 'Add £' + needed + ' more to unlock ' + (nextTier === 300 ? '5%' : nextTier === 400 ? '10%' : '15%') + ' off';
+      savingMsg.textContent = '';
+      originalEl.style.display = 'none';
+    }
+
+    // Update total display
+    document.getElementById('totalAmount').textContent = discountPct > 0
+      ? '£' + discounted + ' + £' + MANDATORY_MONTHLY + '/mo'
+      : '£' + subtotal + ' + £' + MANDATORY_MONTHLY + '/mo';
+
     document.getElementById('totalCount').textContent = count === 0
       ? 'Base package + monthly maintenance included'
-      : `Base package + monthly maintenance + ${count} add-on${count > 1 ? 's' : ''}`;
+      : 'Base package + monthly maintenance + ' + count + ' add-on' + (count > 1 ? 's' : '');
   }
 
   function openModal() {
@@ -773,7 +931,7 @@
     });
     document.getElementById('modalSummary').style.whiteSpace = 'pre-line';
     document.getElementById('modalSummary').textContent = summary;
-    document.getElementById('modalTotal').textContent = `£${total}`;
+    document.getElementById('modalTotal').textContent = `£${total} + £39/mo`;
     document.getElementById('modalOverlay').classList.add('open');
   }
 
@@ -793,15 +951,23 @@
     }
 
     // Build selected addons summary
-    let summary = 'Starter Package (£199)\n';
-    let total = 199;
+    let summary = 'Starter Package (£199)\nMonthly Maintenance (£39/mo)\n';
+    let addonsTotal = 0;
     selected.forEach(key => {
       const el = document.querySelector(`[data-key="${key}"]`);
       const monthly = el.dataset.monthly === 'true';
       summary += `+ ${el.dataset.name} (${monthly ? `£${el.dataset.price}/mo` : `£${el.dataset.price}`})\n`;
-      total += parseInt(el.dataset.price);
+      addonsTotal += parseInt(el.dataset.price);
     });
-    summary += `\nEstimated Total: £${total}`;
+    const subtotal = 199 + addonsTotal;
+    let discountPct = 0;
+    if (subtotal >= 500) discountPct = 15;
+    else if (subtotal >= 400) discountPct = 10;
+    else if (subtotal >= 300) discountPct = 5;
+    const saving = Math.round(subtotal * discountPct / 100);
+    const total = subtotal - saving;
+    if (discountPct > 0) summary += `\n${discountPct}% discount applied — saving £${saving}`;
+    summary += `\nEstimated Total: £${total} + £39/mo`;
 
     const btn = document.querySelector('.submit-btn');
     btn.textContent = 'Sending...';
