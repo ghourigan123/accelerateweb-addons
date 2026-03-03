@@ -608,6 +608,102 @@
     margin-right: 8px;
   }
 
+  /* Checkpoint bar */
+  .checkpoint-bar {
+    position: relative;
+    margin: 16px 0 40px;
+    height: 6px;
+  }
+
+  .cp-track {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: visible;
+  }
+
+  .cp-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: var(--grad);
+    transition: width 0.4s ease;
+    width: 0%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .checkpoint {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+  }
+
+  .cp-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--card2);
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 3;
+  }
+
+  .checkpoint.reached .cp-dot {
+    background: var(--grad);
+    border-color: transparent;
+    box-shadow: 0 0 10px rgba(0,212,255,0.5);
+  }
+
+  .cp-label {
+    position: absolute;
+    top: 20px;
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    white-space: nowrap;
+    transition: color 0.3s;
+    line-height: 1.4;
+  }
+
+  .cp-label span {
+    font-weight: 700;
+  }
+
+  .checkpoint.reached .cp-label {
+    color: var(--accent3);
+  }
+
+  /* Deselect button */
+  .deselect-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+    margin: 0 auto 24px;
+  }
+
+  .deselect-btn:hover {
+    border-color: #ff4444;
+    color: #ff4444;
+  }
+
+  .deselect-btn.visible {
+    display: block;
+  }
+
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
@@ -625,7 +721,7 @@
 
 <div class="container">
   <div class="header">
-    <img src="logo.png" alt="Accelerate Web" style="width:80px;height:80px;object-fit:contain;margin-bottom:20px;border-radius:16px;">
+    <img src="logo.png" alt="Accelerate Web" style="width:80px;height:80px;object-fit:contain;margin:0 auto 20px;display:block;border-radius:16px;">
     <div class="header-tag">Accelerate Web</div>
     <h1>Build Your <span>Perfect Package</span></h1>
     <p>Start with our base package and add exactly what your business needs. Nothing more, nothing less.</p>
@@ -659,15 +755,35 @@
       <span class="discount-label" id="discountLabel">Add more to unlock a discount</span>
       <span class="discount-badge" id="discountBadge">No discount yet</span>
     </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progressFill"></div>
+
+    <!-- Checkpoint progress bar -->
+    <div class="checkpoint-bar">
+      <div class="cp-track">
+        <div class="cp-fill" id="progressFill"></div>
+      </div>
+      <!-- Checkpoint 1: £300 -->
+      <div class="checkpoint" id="cp1" style="left:calc(300/500*100%)">
+        <div class="cp-dot"></div>
+        <div class="cp-label">£300<br><span>5% off</span></div>
+      </div>
+      <!-- Checkpoint 2: £400 -->
+      <div class="checkpoint" id="cp2" style="left:calc(400/500*100%)">
+        <div class="cp-dot"></div>
+        <div class="cp-label">£400<br><span>10% off</span></div>
+      </div>
+      <!-- Checkpoint 3: £500 -->
+      <div class="checkpoint" id="cp3" style="left:100%">
+        <div class="cp-dot"></div>
+        <div class="cp-label">£500<br><span>15% off</span></div>
+      </div>
     </div>
-    <div class="discount-tiers">
-      <span class="tier-label" id="tier1">£300 = 5% off</span>
-      <span class="tier-label" id="tier2">£400 = 10% off</span>
-      <span class="tier-label" id="tier3">£500 = 15% off</span>
-    </div>
+
     <div class="saving-msg" id="savingMsg"></div>
+  </div>
+
+  <!-- Deselect All -->
+  <div style="text-align:center">
+    <button class="deselect-btn" id="deselectBtn" onclick="deselectAll()">✕ Deselect All Add-Ons</button>
   </div>
 
   <!-- Features -->
@@ -823,6 +939,15 @@
   const BASE_PRICE = 199;
   const MANDATORY_MONTHLY = 39;
 
+  function deselectAll() {
+    selected.forEach(key => {
+      const el = document.querySelector(`[data-key="${key}"]`);
+      if (el) el.classList.remove('selected');
+    });
+    selected.clear();
+    updateTotal();
+  }
+
   function renderAddons() {
     Object.entries(addons).forEach(([category, items]) => {
       const container = document.getElementById(category);
@@ -882,10 +1007,15 @@
     const progress = Math.min((subtotal / 500) * 100, 100);
     document.getElementById('progressFill').style.width = progress + '%';
 
-    // Update tier labels
-    document.getElementById('tier1').className = 'tier-label' + (subtotal >= 300 ? ' reached' : '');
-    document.getElementById('tier2').className = 'tier-label' + (subtotal >= 400 ? ' reached' : '');
-    document.getElementById('tier3').className = 'tier-label' + (subtotal >= 500 ? ' reached' : '');
+    // Update checkpoints
+    document.getElementById('cp1').className = 'checkpoint' + (subtotal >= 300 ? ' reached' : '');
+    document.getElementById('cp2').className = 'checkpoint' + (subtotal >= 400 ? ' reached' : '');
+    document.getElementById('cp3').className = 'checkpoint' + (subtotal >= 500 ? ' reached' : '');
+
+    // Show/hide deselect button
+    const deselectBtn = document.getElementById('deselectBtn');
+    if (selected.size > 0) deselectBtn.classList.add('visible');
+    else deselectBtn.classList.remove('visible');
 
     // Update badge and label
     const badge = document.getElementById('discountBadge');
