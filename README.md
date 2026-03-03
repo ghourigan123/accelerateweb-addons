@@ -1,0 +1,2 @@
+# accelerateweb-addons
+Build package
