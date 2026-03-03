@@ -550,7 +550,7 @@
         <p>Up to 3 pages, mobile optimised, contact form, booking system, basic SEO, Google Business Profile, live in 7 days</p>
       </div>
     </div>
-    <div class="base-price">£199</div>
+    <div style="text-align:right"><div class="base-price">£199</div><div style="font-size:13px;color:#888;margin-top:4px">+ £39/mo maintenance</div></div>
   </div>
   <div class="base-included">
     <span class="included-tag">3 Pages</span>
@@ -560,6 +560,7 @@
     <span class="included-tag">Basic SEO</span>
     <span class="included-tag">Google Business Profile</span>
     <span class="included-tag">Live in 7 Days</span>
+    <span class="included-tag" style="border-color:rgba(255,59,255,0.4);color:#FF3BFF;background:rgba(255,59,255,0.08)">£39/mo Maintenance Included</span>
   </div>
 
   <!-- Features -->
@@ -664,50 +665,53 @@
   const addons = {
     features: [
       { name: "Extra page", price: 25 },
-      { name: "Gift cards", price: 50 },
-      { name: "Online shop", price: 100 },
-      { name: "Live chat widget", price: 30 },
-      { name: "WhatsApp chat button", price: 20 },
-      { name: "Google Maps embed", price: 20 },
-      { name: "Social media feed embed", price: 30 },
-      { name: "Pop-up promotion banner", price: 30 },
+      { name: "Gift cards", price: 49 },
+      { name: "Online shop", price: 99 },
+      { name: "Live chat widget", price: 29 },
+      { name: "WhatsApp chat button", price: 19 },
+      { name: "Google Maps embed", price: 19 },
+      { name: "Social media feed embed", price: 29 },
+      { name: "Pop-up promotion banner", price: 29 },
       { name: "Password protected page", price: 25 },
-      { name: "Cookie consent popup", price: 20 },
+      { name: "Cookie consent popup", price: 19 },
     ],
     content: [
-      { name: "Copywriting (per page)", price: 40 },
+      { name: "Copywriting (per page)", price: 39 },
       { name: "Blog setup with 3 posts", price: 75 },
-      { name: "FAQ page", price: 30 },
-      { name: "Meet the team page", price: 40 },
-      { name: "Photo editing and optimisation", price: 30 },
+      { name: "FAQ page", price: 29 },
+      { name: "Meet the team page", price: 39 },
+      { name: "Photo editing and optimisation", price: 29 },
     ],
     marketing: [
       { name: "Full SEO package", price: 75 },
       { name: "Google Analytics setup", price: 25 },
       { name: "Facebook Pixel setup", price: 25 },
-      { name: "Google Ads setup", price: 100 },
-      { name: "Facebook Business setup", price: 40 },
-      { name: "Social media profile setup", price: 40 },
-      { name: "Email newsletter setup", price: 50 },
+      { name: "Google Ads setup", price: 99 },
+      { name: "Facebook Business setup", price: 39 },
+      { name: "Social media profile setup", price: 39 },
+      { name: "Email newsletter setup", price: 49 },
       { name: "QR code linking to website", price: 15 },
     ],
     trust: [
       { name: "Google reviews widget", price: 25 },
-      { name: "Testimonials page", price: 30 },
-      { name: "Trust badges setup", price: 20 },
-      { name: "Privacy policy and T&Cs", price: 30 },
+      { name: "Testimonials page", price: 29 },
+      { name: "Trust badges setup", price: 19 },
+      { name: "Privacy policy and T&Cs", price: 29 },
       { name: "Logo design", price: 75 },
       { name: "Email signature design", price: 25 },
     ],
     ongoing: [
-      { name: "Monthly maintenance", price: 40, monthly: true },
-      { name: "SEO monitoring", price: 50, monthly: true },
-      { name: "Priority support", price: 30, monthly: true },
+      { name: "SEO monitoring", price: 49, monthly: true },
+      { name: "Priority support", price: 29, monthly: true },
       { name: "Full management package", price: 99, monthly: true },
     ]
   };
 
+  const mandatoryMonthly = { name: "Monthly maintenance", price: 39, monthly: true };
+
   const selected = new Set();
+  const BASE_PRICE = 199;
+  const MANDATORY_MONTHLY = 39;
 
   function renderAddons() {
     Object.entries(addons).forEach(([category, items]) => {
@@ -745,17 +749,17 @@
   }
 
   function updateTotal() {
-    let total = 199;
+    let total = BASE_PRICE + MANDATORY_MONTHLY;
     let count = 0;
     selected.forEach(key => {
       const el = document.querySelector(`[data-key="${key}"]`);
       total += parseInt(el.dataset.price);
       count++;
     });
-    document.getElementById('totalAmount').textContent = `£${total}`;
+    document.getElementById('totalAmount').textContent = `£${BASE_PRICE} + £${MANDATORY_MONTHLY}/mo`;
     document.getElementById('totalCount').textContent = count === 0
-      ? 'Base package only'
-      : `Base package + ${count} add-on${count > 1 ? 's' : ''}`;
+      ? 'Base package + monthly maintenance included'
+      : `Base package + monthly maintenance + ${count} add-on${count > 1 ? 's' : ''}`;
   }
 
   function openModal() {
