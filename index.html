@@ -722,7 +722,6 @@
 <div class="container">
   <div class="header">
     <img src="logo.png" alt="Bloomvo" style="width:80px;height:80px;object-fit:contain;margin:0 auto 20px;display:block;border-radius:16px;">
-    <div class="header-tag">Bloomvo</div>
     <h1>Build Your <span>Perfect Package</span></h1>
     <p>Start with our base package and add exactly what your business needs. Nothing more, nothing less.</p>
   </div>
@@ -749,10 +748,10 @@
     <span class="included-tag" style="border-color:rgba(255,59,255,0.4);color:#FF3BFF;background:rgba(255,59,255,0.08)">£39/mo Maintenance Included</span>
   </div>
 
-  <!-- Discount Bar -->
+  <!-- Discount Bar — always visible -->
   <div class="discount-bar-wrap">
     <div class="discount-bar-top">
-      <span class="discount-label" id="discountLabel">Add more to unlock a discount</span>
+      <span class="discount-label" id="discountLabel">Add £101 more to unlock 5% off</span>
       <span class="discount-badge" id="discountBadge">No discount yet</span>
     </div>
 
@@ -761,17 +760,14 @@
       <div class="cp-track">
         <div class="cp-fill" id="progressFill"></div>
       </div>
-      <!-- Checkpoint 1: £300 -->
       <div class="checkpoint" id="cp1" style="left:calc(300/500*100%)">
         <div class="cp-dot"></div>
         <div class="cp-label">£300<br><span>5% off</span></div>
       </div>
-      <!-- Checkpoint 2: £400 -->
       <div class="checkpoint" id="cp2" style="left:calc(400/500*100%)">
         <div class="cp-dot"></div>
         <div class="cp-label">£400<br><span>10% off</span></div>
       </div>
-      <!-- Checkpoint 3: £500 -->
       <div class="checkpoint" id="cp3" style="left:100%">
         <div class="cp-dot"></div>
         <div class="cp-label">£500<br><span>15% off</span></div>
@@ -834,7 +830,7 @@
   <div style="height: 100px"></div>
 </div>
 
-<!-- Sticky Total -->
+<!-- Sticky Total — always visible -->
 <div class="sticky-total">
   <div class="sticky-inner">
     <div class="total-left">
@@ -932,8 +928,6 @@
       { name: "Full management package", price: 99, monthly: true },
     ]
   };
-
-  const mandatoryMonthly = { name: "Monthly maintenance", price: 39, monthly: true };
 
   const selected = new Set();
   const BASE_PRICE = 199;
@@ -1080,7 +1074,6 @@
       return;
     }
 
-    // Build selected addons summary
     let summary = 'Starter Package (£199)\nMonthly Maintenance (£39/mo)\n';
     let addonsTotal = 0;
     selected.forEach(key => {
@@ -1137,6 +1130,7 @@
   });
 
   renderAddons();
+  updateTotal(); // ← called on load so discount bar + total are always populated from the start
 </script>
 </body>
 </html>
