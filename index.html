@@ -275,12 +275,14 @@
 
   /* Sticky total */
   .sticky-total {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: rgba(0,0,0,0.95);
+    position: sticky;
+    bottom: 0;
+    background: rgba(13,13,13,0.98);
     backdrop-filter: blur(20px);
     border-top: 1px solid var(--border);
+    border-radius: 16px;
     padding: 16px 24px;
+    margin-top: 40px;
     z-index: 100;
   }
 
@@ -827,7 +829,7 @@
     <div class="addon-grid" id="ongoing"></div>
   </div>
 
-  <div style="height: 100px"></div>
+  <div style="height: 20px"></div>
 </div>
 
 <!-- Sticky Total — always visible -->
